@@ -1,0 +1,23 @@
+{
+  "name": "expo-custom-updater",
+  "version": "1.0.0",
+  "description": "A simple way to handle Expo Application Updates",
+  "repository": "https://github.com/umbertoghio/expo-custom-updater.git",
+  "homepage": "https://github.com/umbertoghio/expo-custom-updater",
+  "author": "Umberto Ghio",
+  "license": "MIT",
+  "keywords": [
+    "expo",
+    "update"
+  ],
+  "devDependencies": {
+    "expo": "^34.0.4",
+    "moment": "^2.24.0",
+    "react-native": "^0.59.8"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.57.0",
+    "expo": ">=32.0.0",
+    "moment": ">=2.0.0"
+  }
+}
