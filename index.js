@@ -2,7 +2,7 @@ import { AppState } from 'react-native'
 import { Updates } from 'expo'
 import moment from 'moment'
 
-const DEFAULT_MIN_REFRESH_INTERVAL = 30
+const DEFAULT_MIN_REFRESH_INTERVAL = 300
 
 export default class ExpoCustomUpdater {
   constructor ({
