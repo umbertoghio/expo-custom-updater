@@ -55,6 +55,12 @@ You can set the following options in the class constructor:
 * beforeCheckCallback Callback function before the check, useful to show a loading screen
 * afterCheckCallback Callback function after the check, useful to hide a loading screen if no updates are available (if an update is found the application is restarted).
 
+You can then enable the listener for AppState changes that will trigger an update check when user comes back to the App by running
+customUpdater.registerAppStateChangeListener()
+
+Before and when the check is completed the two callbacks will be run, useful to show a loading screen 
+
+
 ```JavaScript
 export default class App extends React.Component {
   constructor (props) {
@@ -68,7 +74,7 @@ export default class App extends React.Component {
     })
   }
   componentDidMount () {
-    this.customUpdater.registerUpdateOnAppStateChange()
+    this.customUpdater.registerAppStateChangeListener()
   }
 
   componentWillUnmount () {

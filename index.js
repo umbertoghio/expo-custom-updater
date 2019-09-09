@@ -26,7 +26,7 @@ export default class ExpoCustomUpdater {
     this.updateLog.push(message)
   }
 
-  registerUpdateOnAppStateChange () {
+  registerAppStateChangeListener () {
     this.log('ExpoCustomUpdater: AppStateChange Handler Registered')
     AppState.addEventListener('change', this.appStateChangeHandler)
   }
