@@ -2,17 +2,26 @@
 
 ## Intro
 
-Hi! this is a small project done to help myself on new Expo App to better handle updates done via Expo Publish.
-Default Expo App OTA updates automatically checks for new version on application startup, with a 30 seconds timeout configured in app.json updates.checkAutomatically, this is nice but have a big limitation: no checks will be done if user just keeps the app open in the background.
+Hi! this is a small project done to help myself on new Expo Apps to better handle OTA updates done via Expo Publish.  
+Default Expo App OTA update system automatically checks for new version on application startup, 
+then tries to download it within 30 seconds(if you set updates.checkAutomatically in app.json), finally uses the new version on the next application startup.  
 
-With this library you can force an update on app startup and perform update checks whenever the user go back to the App. Using the callback functionns you can properly show a loading screen while checks and updates are performed.
+This is a nice system, but considering that users rarely close apps that remain open in the background the side effect is that is hard ot predict when the new code will be actually available in the app.  
+
+Writing a manual update can be hard and in case of bugs your app may be stuck in an update cycle (speaking from experience :-) 
+
+This library have two goals:
+* Force an update on every app startup
+* Force an update when the user go back to the application after some time
+
+In this way your users will always run the up-to-date code published on Expo
 
 ## Install
 
 * `npm install expo-custom-updater` or
 * `yarn add expo-custom-updater`
 
-## Just force update App on Startup
+## Force an update on every app startup
 
 ```JavaScript
 import ExpoCustomUpdater from 'expo-custom-updater'
@@ -23,12 +32,12 @@ customUpdater.doUpdateIfAvailable()
 
 ```
 
-doUpdateIfAvailable is an asyncronus Promise so you can await for it or place it in the Expo loadResourcesAsync
+doUpdateIfAvailable is an asyncronus Promise so you can await for it or better place it in the Expo loadResourcesAsync
 
 ```JavaScript
 async function loadResourcesAsync() {
   await Promise.all([
-    customUpdater.doUpdateIfAvailable()
+    customUpdater.doUpdateIfAvailable(),
     Asset.loadAsync([
       require('....'),
       require('...'),
@@ -36,20 +45,15 @@ async function loadResourcesAsync() {
     ....
 ```
 
-## Full setup with App State Change listener
+## Full setup with App State Change listener 
 
 This allows to check for updates when user returns into the app after some time.
 You can set the following options in the class constructor:
-a custom interval (default is 5 minutes) by setting minRefreshSeconds in the cosntructor.
+
 * minRefreshSeconds Do not check for updates before minRefreshSeconds from the last check (default 300)
 * showDebugInConsole Show what the library is doing in the console (default false)
-* beforeCheckCallback Callback functionn before the check, useful to show a loading screen
-* afterCheckCallback Callback functionn after the check, useful to hide a loading screen if no updates are available.
-
-Note:
-You can read activity logs from customUpdater.updateLog (array of strings)
-Expo does not support OTA updates from development.
-It is useful to compile an APK and do final tests by loading it to device (adb install xxx.apk) and playing with expo publish
+* beforeCheckCallback Callback function before the check, useful to show a loading screen
+* afterCheckCallback Callback function after the check, useful to hide a loading screen if no updates are available (if an update is found the application is restarted).
 
 ```JavaScript
 export default class App extends React.Component {
@@ -72,5 +76,10 @@ export default class App extends React.Component {
   }
 
 ```
+
+ ## Notes:
+* You can read activity logs from customUpdater.updateLog (array of strings), useful for debugging
+* Expo does not support OTA updates from development or within the Expo App.
+* To test your application update method properly it is useful to compile an APK and uplaod it to a connected device with "adb install xxx.apk", then you can play with expo publish to verify the setup 
 
 Have fun!
