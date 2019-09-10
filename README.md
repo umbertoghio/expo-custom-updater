@@ -2,19 +2,20 @@
 
 ## Intro
 
-Hi! this is a small project done to help myself on new Expo Apps to better handle OTA updates done via Expo Publish.  
-Default Expo App OTA update system automatically checks for new version on application startup, 
-then tries to download it within 30 seconds(if you set updates.checkAutomatically in app.json), finally uses the new version on the next application startup.  
+Hi! this is a small project done to help myself on new Expo projects to better handle OTA updates done via Expo Publish.  
+Default Expo App OTA update system automatically checks for new version on application startup if you set updates.checkAutomatically in app.json, the problem is that the new version is actually applied on the next application startup.
 
-This is a nice system, but considering that users rarely close apps that remain open in the background the side effect is that is hard ot predict when the new code will be actually available in the app.  
+Expo OTA updates is a great system, but the default implementation depends on user closing and reopening the App,
+users will only see your code (and your fixes) on the NEXT application startup.
+This makes hard ot predict when the new code will be actually available in the app, expecially with some users that never close Apps.  
 
-Writing a manual update can be hard and in case of bugs your app may be stuck in an update cycle (speaking from experience :-) 
+Writing a manual update routine can be difficult as a bug in this process may cause your app to be stuck in an update cycle (speaking from experience 🤣) 
 
 This library have two goals:
 * Force an update on every app startup
 * Force an update when the user go back to the application after some time
 
-In this way your users will always run the up-to-date code published on Expo
+In this way your users will always run the up-to-date code published on Expo, either when opening the app for the fist time or when coming back to it!
 
 ## Install
 
@@ -50,7 +51,8 @@ async function loadResourcesAsync() {
 This allows to check for updates when user returns into the app after some time.
 You can set the following options in the class constructor:
 
-* minRefreshSeconds Do not check for updates before minRefreshSeconds from the last check (default 300)
+* minRefreshSeconds Do not check for updates before minRefreshSeconds from the last check (default 300).  
+A check for new version will not be done if user switch back to the app within 5 minutes  
 * showDebugInConsole Show what the library is doing in the console (default false)
 * beforeCheckCallback Callback function before the check, useful to show a loading screen
 * afterCheckCallback Callback function after the check, useful to hide a loading screen if no updates are available (if an update is found the application is restarted).
@@ -85,7 +87,7 @@ export default class App extends React.Component {
 
  ## Notes:
 * You can read activity logs from customUpdater.updateLog (array of strings), useful for debugging
-* Expo does not support OTA updates from development or within the Expo App.
-* To test your application update method properly it is useful to compile an APK and uplaod it to a connected device with "adb install xxx.apk", then you can play with expo publish to verify the setup 
+* Expo does not support OTA updates from development or within the Expo App, so check for updates is skipped in __DEV__ mode.
+* To test your application update method properly it is useful to compile an APK and install it to a connected device with "adb install xxx.apk", then you can play with expo publish to verify the setup 
 
 Have fun!
