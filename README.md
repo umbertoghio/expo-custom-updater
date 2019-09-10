@@ -3,12 +3,12 @@
 ## Intro
 
 Hi! this is a small project done to help myself on new Expo projects to better handle OTA updates done via Expo Publish.  
-Default Expo App OTA update system automatically checks for new version on application startup if you set updates.checkAutomatically in app.json, the problem is that the new version is actually applied on the next application startup.
 
-Expo OTA updates is a great system, but the default implementation depends on user closing and reopening the App,
-users will only see your code (and your fixes) on the NEXT application startup.
-This makes hard ot predict when the new code will be actually available in the app, expecially with some users that never close Apps.  
-
+Expo OTA updates is a great system that automatically checks for new version on application startup if you set updates.checkAutomatically in app.json (i.e. to 30000 for 30 seconds).
+  
+The problem is that the users will only see your code (and your fixes) on the NEXT application startup.  
+This makes it hard ot predict when the new code will be actually available in the app, expecially with some users that never close their applications.  
+  
 Writing a manual update routine can be difficult as a bug in this process may cause your app to be stuck in an update cycle (speaking from experience 🤣) 
 
 This library have two goals:
