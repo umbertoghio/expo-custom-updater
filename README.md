@@ -22,7 +22,7 @@ In this way your users will always run the up-to-date code published on Expo, ei
 * `npm install expo-custom-updater` or
 * `yarn add expo-custom-updater`
 
-## Force an update on every app startup
+## Just force an update on every app startup
 
 ```JavaScript
 import ExpoCustomUpdater from 'expo-custom-updater'
@@ -54,7 +54,8 @@ You can set the following options in the class constructor:
 * minRefreshSeconds Do not check for updates before minRefreshSeconds from the last check (default 300).  
 A check for new version will not be done if user switch back to the app within 5 minutes  
 * showDebugInConsole Show what the library is doing in the console (default false)
-* beforeCheckCallback Callback function before the check, useful to show a loading screen
+* beforeCheckCallback Callback function before the check, useful to show a loading / spinner screen
+* beforeDownloadCallback Callback function before fetching a new update, useful to show a loading screen with a message about a new version
 * afterCheckCallback Callback function after the check, useful to hide a loading screen if no updates are available (if an update is found the application is restarted).
 
 You can then enable the listener for AppState changes that will trigger an update check when user comes back to the App by running
@@ -72,6 +73,7 @@ export default class App extends React.Component {
       minRefreshSeconds: 600,
       showDebugInConsole: true,
       beforeCheckCallback: () => this.setState({ showLoadingScreen: true }),
+      beforeDownloadCallback: () => this.setState({updateMessage: 'A new version of the app is being downloaded'}),
       afterCheckCallback: () => this.setState({ showLoadingScreen: false })
     })
   }

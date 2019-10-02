@@ -9,11 +9,13 @@ export default class ExpoCustomUpdater {
     minRefreshSeconds = DEFAULT_MIN_REFRESH_INTERVAL,
     showDebugInConsole = false,
     beforeCheckCallback = null,
+    beforeDownloadCallback = null,
     afterCheckCallback = null
   } = {}) {
     this.minRefreshSeconds = minRefreshSeconds
     this.showDebugInConsole = showDebugInConsole
     this.beforeCheckCallback = beforeCheckCallback
+    this.beforeDownloadCallback = beforeDownloadCallback
     this.afterCheckCallback = afterCheckCallback
     this.lastCheck = 0
     this.appState = AppState.currentState || 'error'
@@ -81,6 +83,8 @@ export default class ExpoCustomUpdater {
         this.log('doUpdateApp: Unable to update in DEV')
         return false
       }
+
+      this.beforeDownloadCallback && this.beforeDownloadCallback()
 
       this.log('doUpdateApp: Fetching Update')
       await Updates.fetchUpdateAsync()
