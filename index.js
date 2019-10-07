@@ -51,6 +51,7 @@ export default class ExpoCustomUpdater {
 
   async doUpdateIfAvailable () {
     const isAvailable = await this.isAppUpdateAvailable()
+    this.lastCheck = moment().unix()
     this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
     isAvailable && this.doUpdateApp()
   }

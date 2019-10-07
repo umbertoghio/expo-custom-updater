@@ -1,6 +1,6 @@
 {
   "name": "expo-custom-updater",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A simple way to handle Expo Application Updates",
   "repository": "https://github.com/umbertoghio/expo-custom-updater.git",
   "homepage": "https://github.com/umbertoghio/expo-custom-updater",
