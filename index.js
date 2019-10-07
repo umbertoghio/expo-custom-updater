@@ -21,6 +21,8 @@ export default class ExpoCustomUpdater {
     this.appState = AppState.currentState || 'error'
     this.updateLog = []
     this.appStateChangeHandler = this.appStateChangeHandler.bind(this)
+    this.isAppUpdateAvailable = this.isAppUpdateAvailable.bind(this)
+    this.doUpdateIfAvailable = this.doUpdateIfAvailable.bind(this)
   }
 
   log (message) {
@@ -39,35 +41,35 @@ export default class ExpoCustomUpdater {
   }
 
   async appStateChangeHandler (nextAppState) {
-    const needToCheck =
-      !!this.appState.match(/inactive|background/) && nextAppState === 'active'
-    this.log(`appStateChangeHandler: ${nextAppState} Update? ${needToCheck}`)
+    const isBackToApp = !!this.appState.match(/inactive|background/) && nextAppState === 'active'
+    const isTimeToCheck = moment().unix() - this.lastCheck > this.minRefreshSeconds
+
     this.appState = nextAppState
-    if (!needToCheck || __DEV__) return false
+    this.log(`appStateChangeHandler: AppState: ${this.appState}, NeedToCheckForUpdate? ${isBackToApp && isTimeToCheck}`)
+
+    if (!isTimeToCheck || !isBackToApp) {
+      isBackToApp && !isTimeToCheck && this.log('appStateChangeHandler: Skip check, within refresh time')
+      return false
+    }
+
     this.beforeCheckCallback && this.beforeCheckCallback()
     await this.doUpdateIfAvailable()
     this.afterCheckCallback && this.afterCheckCallback()
   }
 
   async doUpdateIfAvailable () {
+    this.lastCheck = moment().unix()
     const isAvailable = await this.isAppUpdateAvailable(true)
     this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
     isAvailable && this.doUpdateApp()
   }
 
   async isAppUpdateAvailable (skipTimeCheck) {
-    const { lastCheck, minRefreshSeconds } = this
-    if (!skipTimeCheck && (moment().unix() - lastCheck < minRefreshSeconds)) {
-      this.log('isAppUpdateAvailable: Skip check, within refresh time')
-      return false
-    }
-    
     this.lastCheck = moment().unix()
     if (__DEV__) {
       this.log('isAppUpdateAvailable: Unable to check for update in DEV')
       return false
     }
-
     try {
       const expoUpdates = await Updates.checkForUpdateAsync()
       const updateAvailable = expoUpdates && expoUpdates.isAvailable
