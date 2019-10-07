@@ -43,31 +43,32 @@ export default class ExpoCustomUpdater {
       !!this.appState.match(/inactive|background/) && nextAppState === 'active'
     this.log(`appStateChangeHandler: ${nextAppState} Update? ${needToCheck}`)
     this.appState = nextAppState
-    if (!needToCheck) return false
+    if (!needToCheck || __DEV__) return false
     this.beforeCheckCallback && this.beforeCheckCallback()
     await this.doUpdateIfAvailable()
     this.afterCheckCallback && this.afterCheckCallback()
   }
 
   async doUpdateIfAvailable () {
-    const isAvailable = await this.isAppUpdateAvailable()
-    this.lastCheck = moment().unix()
+    const isAvailable = await this.isAppUpdateAvailable(true)
     this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
     isAvailable && this.doUpdateApp()
   }
 
-  async isAppUpdateAvailable () {
+  async isAppUpdateAvailable (skipTimeCheck) {
     const { lastCheck, minRefreshSeconds } = this
+    if (!skipTimeCheck && (moment().unix() - lastCheck < minRefreshSeconds)) {
+      this.log('isAppUpdateAvailable: Skip check, within refresh time')
+      return false
+    }
+    
+    this.lastCheck = moment().unix()
     if (__DEV__) {
       this.log('isAppUpdateAvailable: Unable to check for update in DEV')
       return false
     }
-    if (moment().unix() - lastCheck < minRefreshSeconds) {
-      this.log('isAppUpdateAvailable: Skip check, within refresh time')
-      return false
-    }
+
     try {
-      this.lastCheck = moment().unix()
       const expoUpdates = await Updates.checkForUpdateAsync()
       const updateAvailable = expoUpdates && expoUpdates.isAvailable
       this.log(`isAppUpdateAvailable: ${updateAvailable}`)
