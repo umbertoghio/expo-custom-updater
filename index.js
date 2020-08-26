@@ -1,5 +1,5 @@
 import { AppState } from 'react-native'
-import { Updates } from 'expo'
+import * as Updates from 'expo-updates'
 import moment from 'moment'
 
 const DEFAULT_MIN_REFRESH_INTERVAL = 300
@@ -94,7 +94,7 @@ export default class ExpoCustomUpdater {
       await Updates.fetchUpdateAsync()
 
       this.log('doUpdateApp: Update fetched, reloading...')
-      Updates.reloadFromCache()
+      Updates.reloadAsync()
     } catch (e) {
       this.log(`doUpdateApp: ERROR: ${e.message}`)
     }
