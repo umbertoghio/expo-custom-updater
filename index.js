@@ -64,7 +64,7 @@ export default class ExpoCustomUpdater {
     isAvailable && this.doUpdateApp()
   }
 
-  async isAppUpdateAvailable (skipTimeCheck) {
+  async isAppUpdateAvailable () {
     this.lastCheck = getUnixEpoch()
     if (__DEV__) {
       this.log('isAppUpdateAvailable: Unable to check for update in DEV')
