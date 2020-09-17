@@ -7,7 +7,7 @@ Hi! this is a small project done to help myself on new Expo projects to better h
 Expo OTA updates is a great system that automatically checks for new version on application startup if you set updates.checkAutomatically in app.json (i.e. to 30000 for 30 seconds).
   
 The problem is that the users will only see your code (and your fixes) on the NEXT application startup.  
-This makes it hard ot predict when the new code will be actually available in the app, expecially with some users that never close their applications.  
+This makes it hard to predict when the new code will be actually available in the app, expecially with some users that never close their applications.  
   
 Writing a manual update routine can be difficult as a bug in this process may cause your app to be stuck in an update cycle (speaking from experience 🤣) 
 
@@ -22,6 +22,17 @@ In this way your users will always run the up-to-date code published on Expo, ei
 * `npm install expo-custom-updater` or
 * `yarn add expo-custom-updater`
 
+## Configue app.json
+
+Add below config in Expo project's `app.json` to prevent Expo from automatically fetching the latest update every time your app is launched.
+
+```
+"updates": {
+    "enabled": true,
+    "checkAutomatically": "ON_ERROR_RECOVERY"
+}
+```
+    
 ## Just force an update on every app startup
 
 ```JavaScript
