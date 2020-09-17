@@ -62,12 +62,13 @@ async function loadResourcesAsync() {
 This allows to check for updates when user returns into the app after some time.
 You can set the following options in the class constructor:
 
-* minRefreshSeconds Do not check for updates before minRefreshSeconds from the last check (default 300).  
+* minRefreshSeconds (optional, default 300) Do not check for updates before minRefreshSeconds from the last check .  
 A check for new version will not be done if user switch back to the app within 5 minutes  
-* showDebugInConsole Show what the library is doing in the console (default false)
-* beforeCheckCallback Callback function before the check, useful to show a loading / spinner screen
-* beforeDownloadCallback Callback function before fetching a new update, useful to show a loading screen with a message about a new version
-* afterCheckCallback Callback function after the check, useful to hide a loading screen if no updates are available (if an update is found the application is restarted).
+* showDebugInConsole (optional, default false) Show what the library is doing in the console 
+* beforeCheckCallback (optional) Callback function before the check, useful to show a loading / spinner screen
+* beforeDownloadCallback (optional) Callback function before fetching a new update, useful to show a loading screen with a message about a new version
+* afterCheckCallback (optional) Callback function after the check, useful to hide a loading screen if no updates are available (if an update is found the application is restarted).
+* throwUpdateErrors (optional, default false) will trhow an exception in case of update errors. It's important to handle this exception properly as setting this to true and not catching the error could result in an infinite update / crash /restart loop
 
 You can then enable the listener for AppState changes that will trigger an update check when user comes back to the App by running
 customUpdater.registerAppStateChangeListener()
