@@ -94,7 +94,7 @@ export default class ExpoCustomUpdater {
       await Updates.fetchUpdateAsync()
 
       this.log('doUpdateApp: Update fetched, reloading...')
-      Updates.reloadAsync()
+      await Updates.reloadAsync()
     } catch (e) {
       this.log(`doUpdateApp: ERROR: ${e.message}`)
     }
