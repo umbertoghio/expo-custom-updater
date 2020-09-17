@@ -1,8 +1,8 @@
 import { AppState } from 'react-native'
 import * as Updates from 'expo-updates'
-import moment from 'moment'
 
 const DEFAULT_MIN_REFRESH_INTERVAL = 300
+const getUnixEpoch = () => Math.floor(Date.now() / 1000)
 
 export default class ExpoCustomUpdater {
   constructor ({
@@ -42,7 +42,7 @@ export default class ExpoCustomUpdater {
 
   async appStateChangeHandler (nextAppState) {
     const isBackToApp = !!this.appState.match(/inactive|background/) && nextAppState === 'active'
-    const isTimeToCheck = moment().unix() - this.lastCheck > this.minRefreshSeconds
+    const isTimeToCheck = (getUnixEpoch() - this.lastCheck) > this.minRefreshSeconds
 
     this.appState = nextAppState
     this.log(`appStateChangeHandler: AppState: ${this.appState}, NeedToCheckForUpdate? ${isBackToApp && isTimeToCheck}`)
@@ -58,14 +58,14 @@ export default class ExpoCustomUpdater {
   }
 
   async doUpdateIfAvailable () {
-    this.lastCheck = moment().unix()
+    this.lastCheck = getUnixEpoch()
     const isAvailable = await this.isAppUpdateAvailable(true)
     this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
     isAvailable && this.doUpdateApp()
   }
 
   async isAppUpdateAvailable (skipTimeCheck) {
-    this.lastCheck = moment().unix()
+    this.lastCheck = getUnixEpoch()
     if (__DEV__) {
       this.log('isAppUpdateAvailable: Unable to check for update in DEV')
       return false
