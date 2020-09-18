@@ -10,7 +10,7 @@ export default class ExpoCustomUpdater {
     showDebugInConsole = false,
     beforeCheckCallback = null,
     beforeDownloadCallback = null,
-    afterCheckCallback = null
+    afterCheckCallback = null,
     throwUpdateErrors = false
   } = {}) {
     this.minRefreshSeconds = minRefreshSeconds
