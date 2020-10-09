@@ -1,5 +1,6 @@
 import { AppState } from 'react-native'
 import * as Updates from 'expo-updates'
+import { Alert } from "react-native"
 
 const DEFAULT_MIN_REFRESH_INTERVAL = 300
 const getUnixEpoch = () => Math.floor(Date.now() / 1000)
@@ -8,13 +9,15 @@ export default class ExpoCustomUpdater {
   constructor ({
     minRefreshSeconds = DEFAULT_MIN_REFRESH_INTERVAL,
     showDebugInConsole = false,
+    showDebugAlerts = false,
     beforeCheckCallback = null,
     beforeDownloadCallback = null,
     afterCheckCallback = null,
-    throwUpdateErrors = false
+    throwUpdateErrors = false,
   } = {}) {
     this.minRefreshSeconds = minRefreshSeconds
     this.showDebugInConsole = showDebugInConsole
+    this.showDebugAlerts = showDebugAlerts
     this.beforeCheckCallback = beforeCheckCallback
     this.beforeDownloadCallback = beforeDownloadCallback
     this.afterCheckCallback = afterCheckCallback
@@ -29,6 +32,7 @@ export default class ExpoCustomUpdater {
 
   log (message) {
     __DEV__ && this.showDebugInConsole && console.log(message)
+    this.showDebugAlerts && Alert.alert("expo-custom-updater", message)
     this.updateLog.push(message)
   }
 
@@ -59,11 +63,10 @@ export default class ExpoCustomUpdater {
     this.afterCheckCallback && this.afterCheckCallback()
   }
 
-  async doUpdateIfAvailable () {
-    this.lastCheck = getUnixEpoch()
+  async doUpdateIfAvailable (force) {
     const isAvailable = await this.isAppUpdateAvailable(true)
     this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
-    isAvailable && this.doUpdateApp()
+    (isAvailable || force) && this.doUpdateApp()
   }
 
   async isAppUpdateAvailable () {
@@ -73,10 +76,9 @@ export default class ExpoCustomUpdater {
       return false
     }
     try {
-      const expoUpdates = await Updates.checkForUpdateAsync()
-      const updateAvailable = expoUpdates && expoUpdates.isAvailable
-      this.log(`isAppUpdateAvailable: ${updateAvailable}`)
-      return updateAvailable
+      const {isAvailable} = await Updates.checkForUpdateAsync()
+      this.log(`isAppUpdateAvailable: ${isAvailable}`)
+      return isAvailable
     } catch (e) {
       this.log(`isAppUpdateAvailable: ERROR: ${e.message}`)
       if (this.throwUpdateErrors) throw e
