@@ -1,6 +1,6 @@
 {
   "name": "expo-custom-updater",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "A simple way to handle Expo Application Updates",
   "repository": "https://github.com/umbertoghio/expo-custom-updater.git",
   "homepage": "https://github.com/umbertoghio/expo-custom-updater",
@@ -15,9 +15,6 @@
   ],
   "devDependencies": {},
   "peerDependencies": {
-    "expo": "~38.0.8"
-  },
-  "dependencies": {
-    "expo-updates": "^0.2.14"
+    "expo-updates": "0.3.x"
   }
 }

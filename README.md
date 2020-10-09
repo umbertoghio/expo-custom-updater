@@ -17,10 +17,13 @@ This library have two goals:
 
 In this way your users will always run the up-to-date code published on Expo, either when opening the app for the fist time or when coming back to it!
 
+Following some issues with last expo updates the package expo-updates is no longer a dependency but a peer-dependency.
+Please add the package to your main project
+
 ## Install
 
-* `npm install expo-custom-updater` or
-* `yarn add expo-custom-updater`
+* `npm install expo-custom-updater expo-updates` or
+* `yarn add expo-custom-updater expo-updates`
 
 ## Configue app.json
 
@@ -57,6 +60,12 @@ async function loadResourcesAsync() {
     ....
 ```
 
+doUpdateIfAvailable now accepts a "force" parameter to skip the result of Expo's Updates.checkForUpdateAsync() and always performs a download / install. Use only for development, it's not ideal to have it in production.
+
+```JavaScript
+customUpdater.doUpdateIfAvailable(true),
+```
+
 ## Full setup with App State Change listener 
 
 This allows to check for updates when user returns into the app after some time.
@@ -65,6 +74,7 @@ You can set the following options in the class constructor:
 * minRefreshSeconds (optional, default 300) Do not check for updates before minRefreshSeconds from the last check .  
 A check for new version will not be done if user switch back to the app within 5 minutes  
 * showDebugInConsole (optional, default false) Show what the library is doing in the console 
+* showDebugAlerts (optional, default false) Show what the library is doing by opening alerts
 * beforeCheckCallback (optional) Callback function before the check, useful to show a loading / spinner screen
 * beforeDownloadCallback (optional) Callback function before fetching a new update, useful to show a loading screen with a message about a new version
 * afterCheckCallback (optional) Callback function after the check, useful to hide a loading screen if no updates are available (if an update is found the application is restarted).
@@ -83,7 +93,7 @@ export default class App extends React.Component {
     this.state = { showLoadingScreen: true }
     this.customUpdater = new ExpoCustomUpdater({
       minRefreshSeconds: 600,
-      showDebugInConsole: true,
+      showDebugAlerts: true, // Only for debugging update issues
       beforeCheckCallback: () => this.setState({ showLoadingScreen: true }),
       beforeDownloadCallback: () => this.setState({updateMessage: 'A new version of the app is being downloaded'}),
       afterCheckCallback: () => this.setState({ showLoadingScreen: false })
@@ -101,6 +111,7 @@ export default class App extends React.Component {
 
  ## Notes:
 * You can read activity logs from customUpdater.updateLog (array of strings), useful for debugging
+* You can now display the event logs with showDebugAlerts
 * Expo does not support OTA updates from development or within the Expo App, so check for updates is skipped in __DEV__ mode.
 * To test your application update method properly it is useful to compile an APK and install it to a connected device with "adb install xxx.apk", then you can play with expo publish to verify the setup 
 
