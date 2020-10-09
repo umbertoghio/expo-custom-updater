@@ -1,6 +1,5 @@
 import { AppState } from 'react-native'
 import * as Updates from 'expo-updates'
-import { Alert } from "react-native"
 
 const DEFAULT_MIN_REFRESH_INTERVAL = 300
 const getUnixEpoch = () => Math.floor(Date.now() / 1000)
@@ -9,7 +8,6 @@ export default class ExpoCustomUpdater {
   constructor ({
     minRefreshSeconds = DEFAULT_MIN_REFRESH_INTERVAL,
     showDebugInConsole = false,
-    showDebugAlerts = false,
     beforeCheckCallback = null,
     beforeDownloadCallback = null,
     afterCheckCallback = null,
@@ -17,7 +15,6 @@ export default class ExpoCustomUpdater {
   } = {}) {
     this.minRefreshSeconds = minRefreshSeconds
     this.showDebugInConsole = showDebugInConsole
-    this.showDebugAlerts = showDebugAlerts
     this.beforeCheckCallback = beforeCheckCallback
     this.beforeDownloadCallback = beforeDownloadCallback
     this.afterCheckCallback = afterCheckCallback
@@ -28,11 +25,11 @@ export default class ExpoCustomUpdater {
     this.appStateChangeHandler = this.appStateChangeHandler.bind(this)
     this.isAppUpdateAvailable = this.isAppUpdateAvailable.bind(this)
     this.doUpdateIfAvailable = this.doUpdateIfAvailable.bind(this)
+    this.log = this.log.bind(this)
   }
 
   log (message) {
     __DEV__ && this.showDebugInConsole && console.log(message)
-    this.showDebugAlerts && Alert.alert("expo-custom-updater", message)
     this.updateLog.push(message)
   }
 
@@ -64,9 +61,10 @@ export default class ExpoCustomUpdater {
   }
 
   async doUpdateIfAvailable (force) {
-    const isAvailable = await this.isAppUpdateAvailable(true)
+    const isAvailable = await this.isAppUpdateAvailable()
     this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
-    (isAvailable || force) && this.doUpdateApp()
+
+    if (isAvailable || force) this.doUpdateApp()
   }
 
   async isAppUpdateAvailable () {
