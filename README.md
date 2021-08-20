@@ -95,11 +95,19 @@ export default class App extends React.Component {
       showDebugInConsole: true, // Only for debugging update issues
       beforeCheckCallback: () => this.setState({ showLoadingScreen: true }),
       beforeDownloadCallback: () => this.setState({updateMessage: 'A new version of the app is being downloaded'}),
-      afterCheckCallback: () => this.setState({ showLoadingScreen: false })
+      afterCheckCallback: () => this.setState({ showLoadingScreen: false }),
+      awaitForUpdate: false // Set to true to wait for the update process, useful for simple apps keeping the splash screen up until update is completed
     })
   }
-  componentDidMount () {
+  componentDidMount () { // example with update during startup
     this.customUpdater.registerAppStateChangeListener()
+    await Promise.all([
+      (async () => { try { await SplashScreen.preventAutoHideAsync() } catch (e) {} })(),
+      this.customUpdater.registerAppStateChangeListener(),
+      this.customUpdater.doUpdateIfAvailable(),
+    ])
+    this.setState({ isLoadingComplete: true })
+    SplashScreen.hideAsync().catch()
   }
 
   componentWillUnmount () {

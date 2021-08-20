@@ -12,6 +12,7 @@ export default class ExpoCustomUpdater {
     beforeDownloadCallback = null,
     afterCheckCallback = null,
     throwUpdateErrors = false,
+    awaitForUpdate = false
   } = {}) {
     this.minRefreshSeconds = minRefreshSeconds
     this.showDebugInConsole = showDebugInConsole
@@ -19,6 +20,7 @@ export default class ExpoCustomUpdater {
     this.beforeDownloadCallback = beforeDownloadCallback
     this.afterCheckCallback = afterCheckCallback
     this.throwUpdateErrors = throwUpdateErrors
+    this.awaitForUpdate = awaitForUpdate
     this.lastCheck = 0
     this.appState = AppState.currentState || 'error'
     this.updateLog = []
@@ -64,7 +66,13 @@ export default class ExpoCustomUpdater {
     const isAvailable = await this.isAppUpdateAvailable()
     this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
 
-    if (isAvailable || force) this.doUpdateApp()
+    if (isAvailable || force) {
+      if (awaitForUpdate) {
+        await this.doUpdateApp()
+      } else {
+        this.doUpdateApp()
+      }
+    }
   }
 
   async isAppUpdateAvailable () {
