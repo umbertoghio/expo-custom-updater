@@ -15,6 +15,6 @@
   ],
   "devDependencies": {},
   "peerDependencies": {
-    "expo-updates": "0.8.x"
+    "expo-updates": "0.*"
   }
 }
