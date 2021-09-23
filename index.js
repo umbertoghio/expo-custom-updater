@@ -5,7 +5,7 @@ const DEFAULT_MIN_REFRESH_INTERVAL = 300
 const getUnixEpoch = () => Math.floor(Date.now() / 1000)
 
 export default class ExpoCustomUpdater {
-  constructor ({
+  constructor({
     minRefreshSeconds = DEFAULT_MIN_REFRESH_INTERVAL,
     showDebugInConsole = false,
     beforeCheckCallback = null,
@@ -30,22 +30,22 @@ export default class ExpoCustomUpdater {
     this.log = this.log.bind(this)
   }
 
-  log (message) {
+  log(message) {
     __DEV__ && this.showDebugInConsole && console.log(message)
     this.updateLog.push(message)
   }
 
-  registerAppStateChangeListener () {
+  registerAppStateChangeListener() {
     this.log('ExpoCustomUpdater: AppStateChange Handler Registered')
     AppState.addEventListener('change', this.appStateChangeHandler)
   }
 
-  removeAppStateChangeListener () {
+  removeAppStateChangeListener() {
     this.log('ExpoCustomUpdater: AppStateChange Handler Removed')
     AppState.removeEventListener('change', this.appStateChangeHandler)
   }
 
-  async appStateChangeHandler (nextAppState) {
+  async appStateChangeHandler(nextAppState) {
     const isBackToApp = !!this.appState.match(/inactive|background/) && nextAppState === 'active'
     const isTimeToCheck = (getUnixEpoch() - this.lastCheck) > this.minRefreshSeconds
 
@@ -62,12 +62,12 @@ export default class ExpoCustomUpdater {
     this.afterCheckCallback && this.afterCheckCallback()
   }
 
-  async doUpdateIfAvailable (force) {
+  async doUpdateIfAvailable(force) {
     const isAvailable = await this.isAppUpdateAvailable()
     this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
 
     if (isAvailable || force) {
-      if (awaitForUpdate) {
+      if (this.awaitForUpdate) {
         await this.doUpdateApp()
       } else {
         this.doUpdateApp()
@@ -75,14 +75,14 @@ export default class ExpoCustomUpdater {
     }
   }
 
-  async isAppUpdateAvailable () {
+  async isAppUpdateAvailable() {
     this.lastCheck = getUnixEpoch()
     if (__DEV__) {
       this.log('isAppUpdateAvailable: Unable to check for update in DEV')
       return false
     }
     try {
-      const {isAvailable} = await Updates.checkForUpdateAsync()
+      const { isAvailable } = await Updates.checkForUpdateAsync()
       this.log(`isAppUpdateAvailable: ${isAvailable}`)
       return isAvailable
     } catch (e) {
@@ -92,7 +92,7 @@ export default class ExpoCustomUpdater {
     }
   }
 
-  async doUpdateApp () {
+  async doUpdateApp() {
     try {
       if (__DEV__) {
         this.log('doUpdateApp: Unable to update in DEV')
