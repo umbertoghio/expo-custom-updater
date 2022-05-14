@@ -111,7 +111,7 @@ doUpdateIfAvailable({
 * throwUpdateErrors (boolean, default false): will trhow an exception in case of update errors. It's important to handle this exception properly as setting this to true and not catching the error could result in an infinite update / crash /restart loop.
 * beforeDownloadCallback (function, default null): In case an update is available run this funciton. Useful to trigger a loading screen with a message about a new version being downloaded
 
-## You must debug updates on a compiled app!
+## Updates only works on compiled apps!
 Expo does not support OTA updates from development or within the Expo App, so check for updates is skipped in __DEV__ mode.
 
 To test your application update method properly it is useful to compile an APK and install it to a connected device with "adb install xxx.apk", then you can play with expo publish to verify the setup.
