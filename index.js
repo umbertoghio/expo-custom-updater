@@ -1,114 +1,88 @@
+import { useRef, useEffect } from 'react'
 import { AppState } from 'react-native'
 import * as Updates from 'expo-updates'
 
-const DEFAULT_MIN_REFRESH_INTERVAL = 300
+const updater = {
+  logs: [],
+  lastTimeCheck: 0,
+  showDebugInConsole: false,
+  default_min_refresh_interval: 300
+}
+
+const log = (message) => {
+  updater.logs.push(message)
+  updater.showDebugInConsole && console.log(message)
+}
+
 const getUnixEpoch = () => Math.floor(Date.now() / 1000)
 
-export default class ExpoCustomUpdater {
-  constructor({
-    minRefreshSeconds = DEFAULT_MIN_REFRESH_INTERVAL,
-    showDebugInConsole = false,
-    beforeCheckCallback = null,
-    beforeDownloadCallback = null,
-    afterCheckCallback = null,
-    throwUpdateErrors = false,
-    awaitForUpdate = false
-  } = {}) {
-    this.minRefreshSeconds = minRefreshSeconds
-    this.showDebugInConsole = showDebugInConsole
-    this.beforeCheckCallback = beforeCheckCallback
-    this.beforeDownloadCallback = beforeDownloadCallback
-    this.afterCheckCallback = afterCheckCallback
-    this.throwUpdateErrors = throwUpdateErrors
-    this.awaitForUpdate = awaitForUpdate
-    this.lastCheck = 0
-    this.appState = AppState.currentState || 'error'
-    this.updateLog = []
-    this.appStateChangeHandler = this.appStateChangeHandler.bind(this)
-    this.isAppUpdateAvailable = this.isAppUpdateAvailable.bind(this)
-    this.doUpdateIfAvailable = this.doUpdateIfAvailable.bind(this)
-    this.log = this.log.bind(this)
+export const getUpdateLogs = () => updater.logs
+
+export const doUpdateIfAvailable = async ({ beforeDownloadCallback, throwUpdateErrors, force } = {}) => {
+  updater.lastTimeCheck = getUnixEpoch()
+
+  if (__DEV__) {
+    log('doUpdateIfAvailable: Unable to update or check for updates in DEV')
+    return false
   }
 
-  log(message) {
-    __DEV__ && this.showDebugInConsole && console.log(message)
-    this.updateLog.push(message)
+  try {
+    log('doUpdateIfAvailable: Checking for updates...')
+    const { isAvailable } = await Updates.checkForUpdateAsync()
+
+    log(`doUpdateIfAvailable: Update available? ${isAvailable}`)
+    if (!isAvailable && !force) return false
+
+    log('doUpdateIfAvailable: Fetching Update')
+    beforeDownloadCallback && beforeDownloadCallback()
+    await Updates.fetchUpdateAsync()
+
+    log('updateApp: Update fetched, reloading...')
+    await Updates.reloadAsync()
+  } catch (e) {
+    log(`doUpdateIfAvailable: ERROR: ${e.message}`)
+    if (throwUpdateErrors) throw e
+    return false
   }
+}
 
-  registerAppStateChangeListener() {
-    this.log('ExpoCustomUpdater: AppStateChange Handler Registered')
-    AppState.addEventListener('change', this.appStateChangeHandler)
-  }
+export const useCustomUpdater = ({
+  updateOnStartup = true,
+  minRefreshSeconds = updater.default_min_refresh_interval,
+  showDebugInConsole = false,
+  beforeCheckCallback = null,
+  beforeDownloadCallback = null,
+  afterCheckCallback = null,
+  throwUpdateErrors = false
+} = {}) => {
+  const appState = useRef(AppState.currentState)
 
-  removeAppStateChangeListener() {
-    this.log('ExpoCustomUpdater: AppStateChange Handler Removed')
-    AppState.removeEventListener('change', this.appStateChangeHandler)
-  }
+  updater.showDebugInConsole = showDebugInConsole
 
-  async appStateChangeHandler(nextAppState) {
-    const isBackToApp = !!this.appState.match(/inactive|background/) && nextAppState === 'active'
-    const isTimeToCheck = (getUnixEpoch() - this.lastCheck) > this.minRefreshSeconds
+  useEffect(() => {
+    // Check for updates on app startup, app will be restarted in case of success
+    updateOnStartup && doUpdateIfAvailable({ beforeDownloadCallback, throwUpdateErrors })
 
-    this.appState = nextAppState
-    this.log(`appStateChangeHandler: AppState: ${this.appState}, NeedToCheckForUpdate? ${isBackToApp && isTimeToCheck}`)
+    const subscription = AppState.addEventListener('change', _handleAppStateChange)
+    return () => {
+      subscription.remove()
+    }
+  }, [])
+
+  const _handleAppStateChange = async (nextAppState) => {
+    const isBackToApp = appState.current.match(/inactive|background/) && nextAppState === 'active'
+    const isTimeToCheck = (getUnixEpoch() - updater.lastTimeCheck) > minRefreshSeconds
+
+    appState.current = nextAppState
+    log(`appStateChangeHandler: AppState: ${appState.current}, NeedToCheckForUpdate? ${isBackToApp && isTimeToCheck}`)
 
     if (!isTimeToCheck || !isBackToApp) {
-      isBackToApp && !isTimeToCheck && this.log('appStateChangeHandler: Skip check, within refresh time')
+      isBackToApp && !isTimeToCheck && log('appStateChangeHandler: Skip check, within refresh time')
       return false
     }
 
-    this.beforeCheckCallback && this.beforeCheckCallback()
-    await this.doUpdateIfAvailable()
-    this.afterCheckCallback && this.afterCheckCallback()
-  }
-
-  async doUpdateIfAvailable(force) {
-    const isAvailable = await this.isAppUpdateAvailable()
-    this.log(`doUpdateIfAvailable: ${isAvailable ? 'Doing' : 'No'} update`)
-
-    if (isAvailable || force) {
-      if (this.awaitForUpdate) {
-        await this.doUpdateApp()
-      } else {
-        this.doUpdateApp()
-      }
-    }
-  }
-
-  async isAppUpdateAvailable() {
-    this.lastCheck = getUnixEpoch()
-    if (__DEV__) {
-      this.log('isAppUpdateAvailable: Unable to check for update in DEV')
-      return false
-    }
-    try {
-      const { isAvailable } = await Updates.checkForUpdateAsync()
-      this.log(`isAppUpdateAvailable: ${isAvailable}`)
-      return isAvailable
-    } catch (e) {
-      this.log(`isAppUpdateAvailable: ERROR: ${e.message}`)
-      if (this.throwUpdateErrors) throw e
-      return false
-    }
-  }
-
-  async doUpdateApp() {
-    try {
-      if (__DEV__) {
-        this.log('doUpdateApp: Unable to update in DEV')
-        return false
-      }
-
-      this.beforeDownloadCallback && this.beforeDownloadCallback()
-
-      this.log('doUpdateApp: Fetching Update')
-      await Updates.fetchUpdateAsync()
-
-      this.log('doUpdateApp: Update fetched, reloading...')
-      await Updates.reloadAsync()
-    } catch (e) {
-      this.log(`doUpdateApp: ERROR: ${e.message}`)
-      if (this.throwUpdateErrors) throw e
-    }
+    beforeCheckCallback && beforeCheckCallback()
+    await doUpdateIfAvailable({ beforeDownloadCallback, throwUpdateErrors })
+    afterCheckCallback && afterCheckCallback()
   }
 }
