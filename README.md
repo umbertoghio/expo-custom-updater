@@ -99,22 +99,23 @@ await doUpdateIfAvailable()
 ```
 doUpdateIfAvailable can accept additional parameters:
 
-* force (boolean, default false): skip the result of Expo's Updates.checkForUpdateAsync() and always performs a download / install. Useful only in development.
-* throwUpdateErrors (boolean, default false): will trhow an exception in case of update errors. It's important to handle this exception properly as setting this to true and not catching the error could result in an infinite update / crash /restart loop.
-* beforeDownloadCallback (function, default null): In case an update is available run this funciton. Useful to trigger a loading screen with a message about a new version being downloaded
-
 ```JavaScript
 doUpdateIfAvailable({
-  force: true
+  force: false
   throwUpdateErrors: false,
   beforeDownloadCallback: () => setShowUpdateIsDownlading(true)
   })
 ```
 
+* force (boolean, default false): skip the result of Expo's Updates.checkForUpdateAsync() and always performs a download / install. Useful only in development.
+* throwUpdateErrors (boolean, default false): will trhow an exception in case of update errors. It's important to handle this exception properly as setting this to true and not catching the error could result in an infinite update / crash /restart loop.
+* beforeDownloadCallback (function, default null): In case an update is available run this funciton. Useful to trigger a loading screen with a message about a new version being downloaded
+
 ## You must debug updates on a compiled app!
 Expo does not support OTA updates from development or within the Expo App, so check for updates is skipped in __DEV__ mode.
 
-To test your application update method properly it is useful to compile an APK and install it to a connected device with "adb install xxx.apk", then you can play with expo publish to verify the setup 
+To test your application update method properly it is useful to compile an APK and install it to a connected device with "adb install xxx.apk", then you can play with expo publish to verify the setup.
+
 Since you can't access console logs there's another function you can use to get an array of strings and display it in a page.
 getUpdateLog is not an hook, it get all the logs from the app start until when is called (i.e. use a setInterval)
 
@@ -126,10 +127,5 @@ import { getUpdateLogs } from 'expo-custom-updater'
 </View>
 
 ```
-
-
- ## Notes:
-* 
-* 
 
 Have fun!
